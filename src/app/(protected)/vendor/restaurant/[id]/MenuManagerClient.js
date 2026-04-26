@@ -30,14 +30,15 @@ export default function MenuManagerClient({ restaurant, initialProducts, categor
     name: '',
     description: '',
     price: '',
-    categoryId: ''
+    categoryId: '',
+    dietaryType: 'VEG'
   })
 
   const [imageFile, setImageFile] = useState(null)
 
   const openAddModal = () => {
     setEditingProduct(null)
-    setFormData({ name: '', description: '', price: '', categoryId: '' })
+    setFormData({ name: '', description: '', price: '', categoryId: '', dietaryType: 'VEG' })
     setImageFile(null)
     setIsModalOpen(true)
   }
@@ -48,7 +49,8 @@ export default function MenuManagerClient({ restaurant, initialProducts, categor
       name: product.name,
       description: product.description || '',
       price: product.price.toString(),
-      categoryId: product.categoryId || ''
+      categoryId: product.categoryId || '',
+      dietaryType: product.dietaryType || 'VEG'
     })
     setImageFile(null)
     setIsModalOpen(true)
@@ -74,6 +76,7 @@ export default function MenuManagerClient({ restaurant, initialProducts, categor
     payload.append('description', formData.description)
     payload.append('price', formData.price)
     payload.append('categoryId', formData.categoryId)
+    payload.append('dietaryType', formData.dietaryType)
     
     if (imageFile) {
       payload.append('image', imageFile)
@@ -145,8 +148,8 @@ export default function MenuManagerClient({ restaurant, initialProducts, categor
             return (
             <div key={product.id} className={`p-6 flex flex-col md:flex-row md:items-start justify-between gap-6 hover:bg-gray-50 transition-colors ${index !== products.length - 1 ? 'border-b border-gray-100' : ''}`}>
               <div className="flex-1">
-                <div className="w-4 h-4 border border-green-600 flex items-center justify-center rounded-sm mb-1">
-                  <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                <div className={`w-4 h-4 border ${product.dietaryType === 'NON-VEG' ? 'border-red-600' : product.dietaryType === 'EGG' ? 'border-yellow-500' : 'border-green-600'} flex items-center justify-center rounded-sm mb-1`}>
+                  <div className={`w-2 h-2 ${product.dietaryType === 'NON-VEG' ? 'bg-red-600' : product.dietaryType === 'EGG' ? 'bg-yellow-500' : 'bg-green-600'} rounded-full`}></div>
                 </div>
                 <h3 className="text-lg font-bold text-[#3d4152] mb-1">{product.name}</h3>
                 <p className="font-medium text-[#3d4152] mb-3">₹{product.price?.toFixed(2) || '0.00'}</p>
@@ -246,6 +249,42 @@ export default function MenuManagerClient({ restaurant, initialProducts, categor
                   </label>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <p className="text-xs font-semibold text-[#93959f] mb-2 px-1">Dietary Preference</p>
+                  <div className="flex gap-2">
+                    <button 
+                      type="button"
+                      className={`flex-1 py-3.5 font-bold text-xs rounded-xl transition-all border-2 flex flex-col items-center justify-center gap-1.5 ${formData.dietaryType === 'VEG' ? 'border-green-600 bg-green-50 text-green-700 scale-[1.02] shadow-sm' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
+                      onClick={() => setFormData({ ...formData, dietaryType: 'VEG' })}
+                    >
+                      <div className="w-4 h-4 border border-green-600 flex items-center justify-center rounded-sm">
+                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                      </div>
+                      VEG
+                    </button>
+                    <button 
+                      type="button"
+                      className={`flex-1 py-3.5 font-bold text-xs rounded-xl transition-all border-2 flex flex-col items-center justify-center gap-1.5 ${formData.dietaryType === 'NON-VEG' ? 'border-red-600 bg-red-50 text-red-700 scale-[1.02] shadow-sm' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
+                      onClick={() => setFormData({ ...formData, dietaryType: 'NON-VEG' })}
+                    >
+                      <div className="w-4 h-4 border border-red-600 flex items-center justify-center rounded-sm">
+                        <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                      </div>
+                      NON-VEG
+                    </button>
+                    <button 
+                      type="button"
+                      className={`flex-1 py-3.5 font-bold text-xs rounded-xl transition-all border-2 flex flex-col items-center justify-center gap-1.5 ${formData.dietaryType === 'EGG' ? 'border-yellow-500 bg-yellow-50 text-yellow-700 scale-[1.02] shadow-sm' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
+                      onClick={() => setFormData({ ...formData, dietaryType: 'EGG' })}
+                    >
+                      <div className="w-4 h-4 border border-yellow-500 flex items-center justify-center rounded-sm">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                      </div>
+                      EGG
+                    </button>
                   </div>
                 </div>
 

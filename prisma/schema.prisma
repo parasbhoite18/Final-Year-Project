@@ -54,6 +54,7 @@ model Product {
   description String?
   price       Float
   image       String?
+  dietaryType String?   @default("VEG") // "VEG", "NON-VEG", or "EGG"
   createdAt   DateTime  @default(now())
   
   cartItems   CartItem[]

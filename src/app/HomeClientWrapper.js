@@ -2,11 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import AuthDrawer from '@/components/AuthDrawer'
 import LocationPicker from '@/components/LocationPicker'
 
-export default function HomeClientWrapper({ session, children }) {
+export default function HomeClientWrapper({ session: initialSession, children }) {
+  const { data: session } = useSession()
+  const displaySession = session || initialSession
+  
   const [isAuthOpen, setIsAuthOpen] = useState(false)
   const [authView, setAuthView] = useState('login')
 
@@ -16,7 +19,7 @@ export default function HomeClientWrapper({ session, children }) {
   }
 
   const handleCartClick = (e) => {
-    if (!session) {
+    if (!displaySession) {
       e.preventDefault()
       openAuth('login')
     }
@@ -43,7 +46,7 @@ export default function HomeClientWrapper({ session, children }) {
               <span className="hidden lg:inline text-sm uppercase tracking-wider">Search</span>
             </Link>
             
-            {session ? (
+            {displaySession ? (
               <div className="flex items-center gap-4 md:gap-8">
                 <Link href="/cart" onClick={handleCartClick} className="flex items-center gap-2 hover:text-swiggy-orange transition-colors">
                   <div className="relative">
@@ -52,15 +55,15 @@ export default function HomeClientWrapper({ session, children }) {
                   <span className="hidden lg:inline text-sm uppercase tracking-wider">Cart</span>
                 </Link>
 
-                <div className="flex items-center gap-2 group cursor-pointer" onClick={() => window.location.href = session.user.role === 'vendor' ? '/vendor' : '/orders'}>
+                <div className="flex items-center gap-2 group cursor-pointer" onClick={() => window.location.href = displaySession.user.role === 'vendor' ? '/vendor' : '/orders'}>
                   <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-swiggy-orange border border-gray-200">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" /></svg>
                   </div>
-                  <span className="hidden md:inline text-sm uppercase tracking-wider group-hover:text-swiggy-orange transition-colors">{session.user.name?.split(' ')[0]}</span>
+                  <span className="hidden md:inline text-sm uppercase tracking-wider group-hover:text-swiggy-orange transition-colors">{displaySession.user.name?.split(' ')[0]}</span>
                 </div>
 
                 <button 
-                  onClick={() => signOut()} 
+                  onClick={() => signOut({ callbackUrl: '/' })} 
                   className="text-xs font-black text-gray-400 hover:text-red-500 transition-colors uppercase tracking-widest"
                 >
                   Logout

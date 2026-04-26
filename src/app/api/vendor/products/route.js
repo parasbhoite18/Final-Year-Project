@@ -45,6 +45,7 @@ export async function POST(req) {
     const name = formData.get('name')
     const description = formData.get('description')
     const price = formData.get('price')
+    const dietaryType = formData.get('dietaryType') || 'VEG'
     const file = formData.get('image')
     
     if (!(await checkOwnership(vendorId, session.user.id))) {
@@ -56,18 +57,19 @@ export async function POST(req) {
       imageUrl = '/uploads/restaurant_banner.png' // Default generic image
     }
 
-    await prisma.product.create({
+    const product = await prisma.product.create({
       data: {
         vendorId,
         categoryId: categoryId || null,
         name,
         description: description || null,
         price: parseFloat(price),
-        image: imageUrl
+        image: imageUrl,
+        dietaryType: dietaryType
       }
     })
 
-    return new Response(JSON.stringify({ success: true }), { status: 200 })
+    return new Response(JSON.stringify({ success: true, product }), { status: 200 })
   } catch (error) {
     console.error(error)
     return new Response('Error adding product', { status: 500 })
@@ -116,6 +118,7 @@ export async function PUT(req) {
     const name = formData.get('name')
     const description = formData.get('description')
     const price = formData.get('price')
+    const dietaryType = formData.get('dietaryType')
     const file = formData.get('image')
     
     if (!(await checkOwnership(vendorId, session.user.id))) {
@@ -133,18 +136,19 @@ export async function PUT(req) {
       imageUrl = existing.image // Keep existing if no new file uploaded
     }
 
-    await prisma.product.update({
+    const product = await prisma.product.update({
       where: { id },
       data: {
         name,
         description: description || null,
         price: parseFloat(price),
         categoryId: categoryId || null,
-        image: imageUrl
+        image: imageUrl,
+        dietaryType: dietaryType || undefined
       }
     })
 
-    return new Response(JSON.stringify({ success: true }), { status: 200 })
+    return new Response(JSON.stringify({ success: true, product }), { status: 200 })
   } catch (error) {
     console.error(error)
     return new Response('Error updating product', { status: 500 })
