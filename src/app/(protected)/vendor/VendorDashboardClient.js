@@ -36,7 +36,7 @@ export default function VendorDashboardClient({ defaultType = 'RESTAURANT' }) {
 
       if (res.ok) {
         setIsOpen(false)
-        setFormData({ shopName: '', storeType: 'RESTAURANT', address: '', phone: '' })
+        setFormData({ shopName: '', storeType: defaultType, address: '', phone: '' })
         setImageFile(null)
         router.refresh()
       } else {

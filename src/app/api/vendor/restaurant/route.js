@@ -115,3 +115,37 @@ export async function PUT(req) {
     return new Response('Error updating restaurant', { status: 500 })
   }
 }
+
+export async function DELETE(req) {
+  const session = await getServerSession(authOptions)
+  if (!session || session.user.role !== 'vendor') {
+    return new Response('Unauthorized', { status: 401 })
+  }
+
+  try {
+    const { searchParams } = new URL(req.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return new Response('ID is required', { status: 400 })
+    }
+
+    // Verify ownership
+    const existing = await prisma.vendorProfile.findFirst({
+      where: { id: id, userId: session.user.id }
+    })
+
+    if (!existing) {
+      return new Response('Restaurant not found or unauthorized', { status: 403 })
+    }
+
+    await prisma.vendorProfile.delete({
+      where: { id: id }
+    })
+
+    return new Response(JSON.stringify({ success: true }), { status: 200 })
+  } catch (error) {
+    console.error(error)
+    return new Response('Error deleting restaurant', { status: 500 })
+  }
+}

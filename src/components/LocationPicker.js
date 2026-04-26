@@ -5,15 +5,16 @@ import { MapPin, Navigation, Search, X } from 'lucide-react'
 
 export default function LocationPicker() {
   const [isOpen, setIsOpen] = useState(false)
-  const [location, setLocation] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('user-location') || 'Setup your location'
-    }
-    return 'Setup your location'
-  })
+  const [location, setLocation] = useState('Setup your location')
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
   const [suggestions, setSuggestions] = useState([])
+
+  useEffect(() => {
+    // Safely load from localStorage after hydration
+    const saved = localStorage.getItem('user-location')
+    if (saved) setLocation(saved)
+  }, [])
 
   useEffect(() => {
     if (search.trim().length > 2) {
@@ -31,11 +32,6 @@ export default function LocationPicker() {
       setSuggestions([])
     }
   }, [search])
-
-  useEffect(() => {
-    // This effect is now just for hydration safety if needed, 
-    // but the initializer handles it for client-side.
-  }, [])
 
   const updateLocation = (newLoc) => {
     setLocation(newLoc)
