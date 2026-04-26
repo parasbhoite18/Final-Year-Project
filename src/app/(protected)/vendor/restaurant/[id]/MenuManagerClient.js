@@ -7,7 +7,21 @@ import Image from 'next/image'
 export default function MenuManagerClient({ restaurant, initialProducts, categories }) {
   const router = useRouter()
   
-  const [products, setProducts] = useState(initialProducts)
+  // Ensure categories is an array with valid items
+  const safeCategories = Array.isArray(categories) 
+    ? categories.filter(cat => cat && typeof cat === 'object' && cat.id && cat.name) 
+    : []
+  
+  // Debug log
+  console.log('MenuManagerClient received:', { 
+    restaurantId: restaurant?.id, 
+    productsCount: initialProducts?.length, 
+    categoriesCount: categories?.length,
+    safeCategoriesCount: safeCategories.length,
+    categories: categories
+  })
+  
+  const [products, setProducts] = useState(initialProducts || [])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -123,15 +137,20 @@ export default function MenuManagerClient({ restaurant, initialProducts, categor
         </div>
       ) : (
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-          {products.map((product, index) => (
+          {Array.isArray(products) && products.length > 0 && products.map((product, index) => {
+            if (!product || !product.id || !product.name) {
+              console.warn('Invalid product object:', product)
+              return null
+            }
+            return (
             <div key={product.id} className={`p-6 flex flex-col md:flex-row md:items-start justify-between gap-6 hover:bg-gray-50 transition-colors ${index !== products.length - 1 ? 'border-b border-gray-100' : ''}`}>
               <div className="flex-1">
                 <div className="w-4 h-4 border border-green-600 flex items-center justify-center rounded-sm mb-1">
                   <div className="w-2 h-2 bg-green-600 rounded-full"></div>
                 </div>
                 <h3 className="text-lg font-bold text-[#3d4152] mb-1">{product.name}</h3>
-                <p className="font-medium text-[#3d4152] mb-3">₹{product.price.toFixed(2)}</p>
-                <p className="text-sm text-[#02060c99] leading-relaxed line-clamp-2">{product.description}</p>
+                <p className="font-medium text-[#3d4152] mb-3">₹{product.price?.toFixed(2) || '0.00'}</p>
+                <p className="text-sm text-[#02060c99] leading-relaxed line-clamp-2">{product.description || 'No description'}</p>
               </div>
               
               <div className="flex flex-col items-end gap-3 min-w-[120px]">
@@ -153,7 +172,8 @@ export default function MenuManagerClient({ restaurant, initialProducts, categor
                 </div>
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -209,9 +229,17 @@ export default function MenuManagerClient({ restaurant, initialProducts, categor
                     className="w-full px-4 pt-6 pb-2 border border-[#bebfc5] rounded-xl text-[#02060c] font-medium focus:outline-none focus:border-swiggy-orange focus:ring-1 focus:ring-swiggy-orange transition-all appearance-none bg-white" 
                   >
                     <option value="" disabled>Select a category</option>
-                    {categories.map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
-                    ))}
+                    {safeCategories && safeCategories.length > 0 ? (
+                      safeCategories.map(cat => {
+                        if (!cat || !cat.id || !cat.name) {
+                          console.warn('Invalid category object:', cat)
+                          return null
+                        }
+                        return <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      })
+                    ) : (
+                      <option disabled>No categories available</option>
+                    )}
                   </select>
                   <label className="absolute left-4 top-2 text-xs font-semibold text-[#93959f]">
                     Category

@@ -38,6 +38,11 @@ export default async function RestaurantManagerPage({ params }) {
     orderBy: { order: 'asc' }
   })
 
+  // Debug: Log categories to ensure they're fetched correctly
+  if (categories.length === 0) {
+    console.warn(`No categories found for storeType: ${restaurant.storeType}`)
+  }
+
   return (
     <div className="min-h-screen bg-[#f0f0f5] font-sans selection:bg-swiggy-orange selection:text-white pb-24">
       
